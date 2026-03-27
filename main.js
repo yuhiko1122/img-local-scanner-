@@ -51,11 +51,6 @@ function processFile(file) {
       const lat = dmsToDecimal(latArr, latRef);
       const lng = dmsToDecimal(lngArr, lngRef);
 
-      document.getElementById('latValue').textContent = lat.toFixed(7) + '°';
-      document.getElementById('lngValue').textContent = lng.toFixed(7) + '°';
-      document.getElementById('dmsValue').textContent =
-        formatDMS(latArr, latRef) + '  /  ' + formatDMS(lngArr, lngRef);
-
       document.getElementById('resultSuccess').classList.remove('hidden');
       document.getElementById('resultEmpty').classList.add('hidden');
       document.getElementById('resultError').classList.add('hidden');
