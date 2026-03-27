@@ -4,213 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>画像 位置情報スキャナー</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+<body>
 
-  <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-6">
+  <div class="card">
 
-    <h1 class="text-2xl font-bold text-gray-800 text-center tracking-tight">
-      📍 画像 位置情報スキャナー
-    </h1>
-    <p class="text-sm text-gray-500 text-center">
-      JPEGをアップロードしてExif GPSデータを取得します
-    </p>
+    <h1>📍 画像 位置情報スキャナー</h1>
+    <p class="subtitle">JPEGをアップロードしてExif GPSデータを取得します</p>
 
     <!-- ドロップゾーン -->
-    <label
-      id="dropzone"
-      class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
-    >
-      <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <label id="dropzone">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
           d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
       </svg>
-      <span class="text-sm text-gray-500">クリックまたはドラッグ＆ドロップ</span>
-      <span class="text-xs text-gray-400 mt-1">JPEG / JPG</span>
-      <input id="fileInput" type="file" accept="image/jpeg" class="hidden" />
+      <span class="drop-label">クリックまたはドラッグ＆ドロップ</span>
+      <span class="drop-hint">JPEG / JPG</span>
+      <input id="fileInput" type="file" accept="image/jpeg" style="display:none" />
     </label>
 
     <!-- 画像プレビュー -->
     <div id="previewWrapper" class="hidden">
-      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">プレビュー</p>
-      <img
-        id="preview"
-        alt="preview"
-        class="w-full max-h-72 object-contain rounded-xl border border-gray-100 bg-gray-50"
-      />
+      <p class="section-label">プレビュー</p>
+      <img id="preview" alt="preview" />
     </div>
 
     <!-- 結果 -->
     <div id="resultWrapper" class="hidden">
-      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Exif 位置情報</p>
+      <p class="section-label">Exif 位置情報</p>
 
-      <div id="resultSuccess" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 space-y-2">
-        <div class="flex items-center gap-2">
-          <span class="text-green-600 text-lg">✅</span>
-          <span class="text-sm font-semibold text-green-700">位置情報が見つかりました</span>
+      <div id="resultSuccess" class="result-box success hidden">
+        <div class="result-title">
+          <span>✅</span>
+          <span>位置情報が見つかりました</span>
         </div>
-        <div class="grid grid-cols-2 gap-3 mt-2">
-          <div class="bg-white rounded-lg p-3 border border-green-100">
-            <p class="text-xs text-gray-400 mb-1">緯度 (Latitude)</p>
-            <p id="latValue" class="text-base font-mono font-semibold text-gray-800"></p>
+        <div class="coords-grid">
+          <div class="coord-card">
+            <p class="coord-label">緯度 (Latitude)</p>
+            <p id="latValue" class="coord-value"></p>
           </div>
-          <div class="bg-white rounded-lg p-3 border border-green-100">
-            <p class="text-xs text-gray-400 mb-1">経度 (Longitude)</p>
-            <p id="lngValue" class="text-base font-mono font-semibold text-gray-800"></p>
+          <div class="coord-card">
+            <p class="coord-label">経度 (Longitude)</p>
+            <p id="lngValue" class="coord-value"></p>
           </div>
         </div>
-        <p id="dmsValue" class="text-xs text-gray-500 pt-1"></p>
-
-        <!-- 住所 -->
-        <div class="bg-white rounded-lg p-3 border border-green-100 mt-1">
-          <p class="text-xs text-gray-400 mb-1">住所 (Address)</p>
-          <p id="addressValue" class="text-sm text-gray-700">取得中...</p>
+        <p id="dmsValue"></p>
+        <div class="address-card">
+          <p class="coord-label">住所 (Address)</p>
+          <p id="addressValue">取得中...</p>
         </div>
       </div>
 
-      <div id="resultEmpty" class="hidden bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-2">
-        <span class="text-yellow-500 text-lg">⚠️</span>
-        <span class="text-sm text-yellow-700">位置情報が見つかりません</span>
+      <div id="resultEmpty" class="result-box empty hidden">
+        <span>⚠️</span>
+        <span>位置情報が見つかりません</span>
       </div>
 
-      <div id="resultError" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-2">
-        <span class="text-red-500 text-lg">❌</span>
-        <span id="errorMessage" class="text-sm text-red-700"></span>
+      <div id="resultError" class="result-box error hidden">
+        <span>❌</span>
+        <span id="errorMessage"></span>
       </div>
     </div>
 
   </div>
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const dropzone  = document.getElementById('dropzone');
-
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add('border-blue-400', 'bg-blue-50');
-    });
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('border-blue-400', 'bg-blue-50');
-    });
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('border-blue-400', 'bg-blue-50');
-      const file = e.dataTransfer.files[0];
-      if (file) processFile(file);
-    });
-
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) processFile(fileInput.files[0]);
-    });
-
-    function processFile(file) {
-      if (!file.type.match(/image\/jpe?g/i)) {
-        showError('JPEGファイルのみ対応しています。');
-        return;
-      }
-
-      // プレビュー表示
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        document.getElementById('preview').src = e.target.result;
-        document.getElementById('previewWrapper').classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-
-      // Exif 読み込み
-      EXIF.getData(file, function () {
-        const latArr  = EXIF.getTag(this, 'GPSLatitude');
-        const lngArr  = EXIF.getTag(this, 'GPSLongitude');
-        const latRef  = EXIF.getTag(this, 'GPSLatitudeRef')  || 'N';
-        const lngRef  = EXIF.getTag(this, 'GPSLongitudeRef') || 'E';
-
-        document.getElementById('resultWrapper').classList.remove('hidden');
-
-        if (!latArr || !lngArr) {
-          showEmpty();
-          return;
-        }
-
-        try {
-          const lat = dmsToDecimal(latArr, latRef);
-          const lng = dmsToDecimal(lngArr, lngRef);
-
-          document.getElementById('latValue').textContent = lat.toFixed(7) + '°';
-          document.getElementById('lngValue').textContent = lng.toFixed(7) + '°';
-          document.getElementById('dmsValue').textContent =
-            formatDMS(latArr, latRef) + '  /  ' + formatDMS(lngArr, lngRef);
-
-          document.getElementById('resultSuccess').classList.remove('hidden');
-          document.getElementById('resultEmpty').classList.add('hidden');
-          document.getElementById('resultError').classList.add('hidden');
-
-          // 住所取得
-          fetchAddress(lat, lng);
-        } catch (err) {
-          showError('位置情報の解析に失敗しました: ' + err.message);
-        }
-      });
-    }
-
-    /**
-     * DMS配列（度・分・秒）を10進数に変換する。
-     * exif-js は各値を { numerator, denominator } の Rational で返す場合がある。
-     */
-    function toNum(v) {
-      if (typeof v === 'number') return v;
-      if (v && typeof v === 'object' && 'numerator' in v) {
-        return v.denominator === 0 ? 0 : v.numerator / v.denominator;
-      }
-      return Number(v);
-    }
-
-    function dmsToDecimal(dmsArr, ref) {
-      const deg = toNum(dmsArr[0]);
-      const min = toNum(dmsArr[1]);
-      const sec = toNum(dmsArr[2]);
-      let dec = deg + min / 60 + sec / 3600;
-      if (ref === 'S' || ref === 'W') dec = -dec;
-      return dec;
-    }
-
-    function formatDMS(dmsArr, ref) {
-      const d = toNum(dmsArr[0]).toFixed(0);
-      const m = toNum(dmsArr[1]).toFixed(0);
-      const s = toNum(dmsArr[2]).toFixed(2);
-      return `${d}° ${m}' ${s}" ${ref}`;
-    }
-
-    async function fetchAddress(lat, lng) {
-      const el = document.getElementById('addressValue');
-      el.textContent = '取得中...';
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ja`,
-          { headers: { 'Accept-Language': 'ja' } }
-        );
-        const data = await res.json();
-        el.textContent = data.display_name ?? '住所が見つかりません';
-      } catch {
-        el.textContent = '住所の取得に失敗しました';
-      }
-    }
-
-    function showEmpty() {
-      document.getElementById('resultEmpty').classList.remove('hidden');
-      document.getElementById('resultSuccess').classList.add('hidden');
-      document.getElementById('resultError').classList.add('hidden');
-    }
-
-    function showError(msg) {
-      document.getElementById('resultWrapper').classList.remove('hidden');
-      document.getElementById('resultError').classList.remove('hidden');
-      document.getElementById('resultSuccess').classList.add('hidden');
-      document.getElementById('resultEmpty').classList.add('hidden');
-      document.getElementById('errorMessage').textContent = msg;
-    }
-  </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
